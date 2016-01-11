@@ -1,4 +1,4 @@
-***Socket.io simple chat room exercise
+###Socket.io simple chat room exercise
 
 _taken from a couple tutorials I found online [single chatroom exercise](http://socket.io/get-started/chat/) and [multiple room exercise](http://psitsmike.com/2011/10/node-js-and-socket-io-multiroom-chat-tutorial/)_
 
