@@ -16,25 +16,96 @@
   <script src="/socket.io/socket.io.js"></script>
   <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
   <script>
-    $(function(){
-        var socket = io.connect();
+    //$(function(){
         $(window).on('beforeunload', function(){
             socket.close();
         });
-        $('form').submit(function(){
-            socket.emit('chat message', $('#m').val());
-            $('#m').val('');
-        return false;
+        
+        var socket = io.connect(); 
+        	// on connection to server, ask for user's name with an anonymous callback
+	   socket.on('connect', function(){
+		// call the server-side function 'adduser' and send one parameter (value of prompt)
+		  socket.emit('adduser', prompt("What's your name?"));
+	   });
+
+	   // listener, whenever the server emits 'updatechat', this updates the chat body
+	   socket.on('updatechat', function (username, data) {
+		  $('#conversation').append('<b>'+username + ':</b> ' + data + '<br>');
+	   });
+
+	   // listener, whenever the server emits 'updaterooms', this updates the room the client is in
+	   socket.on('updaterooms', function(rooms, current_room) {
+		  $('#rooms').empty();
+		  $.each(rooms, function(key, value) {
+			 if(value == current_room){
+                $('#rooms').append('<div>' + value + '</div>');
+			 }
+			 else {
+				$('#rooms').append('<div><a href="#" onclick="switchRoom(\''+value+'\')">' + value + '</a></div>');
+			 }
+          });
         });
-        socket.on('chat message', function(msg){
-            $('#messages').append($('<li>').text(msg));
-        });
-    });// jquery wrapper to make sure variables are initialized
+
+        function switchRoom(room){
+            socket.emit('switchRoom', room);
+        };
+
+	// on load of page
+	$(function(){
+		// when the client clicks SEND
+		$('#send').click( function() {
+			var message = $('#m').val();
+			$('#m').val('');
+			// tell server to execute 'sendchat' and send along one parameter
+			socket.emit('sendchat', message);
+		});
+
+		// when the client hits ENTER on their keyboard
+		$('#m').keypress(function(e) {
+			if(e.which == 13) {
+				$(this).blur();
+				$('#send').focus().click();
+			}
+		});
+	});
+//});
+
+</script>    
+<script>  
+        // first tutorial code
+        // $('form').submit(function(){
+        //     socket.emit('chat message', $('#m').val());
+        //     $('#m').val('');
+        // return false;
+        // });
+        // socket.on('chat message', function(msg){
+        //     $('#messages').append($('<li>').text(msg));
+        // });
+        // end first tutorial code
+        
+    //});// jquery wrapper to make sure variables are initialized
   </script>
   <body>
-    <ul id="messages"></ul>
-    <form action="">
-      <input id="m" autocomplete="off" /><button>Send</button>
-    </form>
+    <div style="float:left;width:100px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;">
+        <b>ROOMS</b>
+        <div id="rooms"></div>
+    </div>
+    <ul id="conversation"></ul>
+      <input id="m" autocomplete="off" /><button id="send">Send</button>
   </body>
 </html>
+
+<!--second tutorial html-->
+<!--<div style="float:left;width:100px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;">
+	<b>ROOMS</b>
+	<div id="rooms"></div>
+</div>-->
+<!--<div style="float:left;width:100px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;">
+	<b>ROOMS</b>
+	<div id="rooms"></div>
+</div>
+<div style="float:left;width:300px;height:250px;overflow:scroll-y;padding:10px;">
+	<div id="conversation"></div>
+	<input id="data" style="width:200px;" />
+	<input type="button" id="datasend" value="send" />
+</div>-->
